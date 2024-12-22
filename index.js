@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5001;
 require("dotenv").config();
@@ -20,7 +20,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -29,10 +29,25 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
 
     // Start here
-    
+    const booksCollection = client.db("booksDB").collection("allBooks");
+
+    // app.get("/allBooks", async (req, res) => {
+    //   const cursor = visaCollection.find().sort({ _id: -1 }).limit(6);
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
+
+    app.post("/addBook", async (req, res) => {
+      const newBook = req.body;
+      const result = await booksCollection.insertOne(newBook);
+      res.send(result);
+    });
+
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -40,10 +55,9 @@ async function run() {
 }
 run().catch(console.dir);
 
-
 app.get("/", (req, res) => {
-    res.send("A11 server is working")
-})
+  res.send("A11 server is working");
+});
 
 app.listen(port, () => {
   console.log(`A11 server is running on port: ${port}`);
