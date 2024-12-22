@@ -40,6 +40,15 @@ async function run() {
       res.send(result);
     });
 
+    // Get books by category
+    app.get("/booksByCategory", async (req, res) => {
+      const category = req.query.category;
+      const query = { category: category };
+      const cursor = booksCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // Get book by id
     app.get("/book/:id", async (req, res) => {
       const id = req.params.id;
