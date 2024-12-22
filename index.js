@@ -36,12 +36,14 @@ async function run() {
     // Start here
     const booksCollection = client.db("booksDB").collection("allBooks");
 
+    // Get all books from database
     app.get("/allBooks", async (req, res) => {
       const cursor = booksCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // Add a book to database
     app.post("/addBook", async (req, res) => {
       const newBook = req.body;
       const result = await booksCollection.insertOne(newBook);
