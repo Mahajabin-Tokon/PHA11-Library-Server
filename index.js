@@ -36,11 +36,11 @@ async function run() {
     // Start here
     const booksCollection = client.db("booksDB").collection("allBooks");
 
-    // app.get("/allBooks", async (req, res) => {
-    //   const cursor = visaCollection.find().sort({ _id: -1 }).limit(6);
-    //   const result = await cursor.toArray();
-    //   res.send(result);
-    // });
+    app.get("/allBooks", async (req, res) => {
+      const cursor = booksCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     app.post("/addBook", async (req, res) => {
       const newBook = req.body;
