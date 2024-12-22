@@ -9,9 +9,6 @@ require("dotenv").config();
 app.use(cors());
 app.use(express.json());
 
-// DB_USER = a11Master
-// DB_PASSWORD = 7UiU2Voshbls1jFN
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.85wcl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -48,7 +45,6 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await booksCollection.findOne(query);
-      
       res.send(result);
     });
 
@@ -56,6 +52,27 @@ async function run() {
     app.post("/addBook", async (req, res) => {
       const newBook = req.body;
       const result = await booksCollection.insertOne(newBook);
+      res.send(result);
+    });
+
+    // Update a book by id
+    app.patch("/book/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedBook = req.body;
+      const book = {
+        $set: {
+          coverImage: updatedBook.coverImage,
+          title: updatedBook.title,
+          authorName: updatedBook.authorName,
+          category: updatedBook.category,
+          rating: updatedBook.rating,
+        },
+      };
+
+      const result = await booksCollection.updateOne(filter, book, options);
+      console.log(result)
       res.send(result);
     });
 
