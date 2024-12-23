@@ -90,13 +90,13 @@ async function run() {
     app.post("/borrowBook", async (req, res) => {
       const borrowedBookData = req.body;
       // If a user has already borrowed
-      // const query = { email: borrowedBookData.email, bookID: borrowedBookData.bookID };
-      // const alreadyExist = await borrowedCollection.findOne(query);
-      // console.log("If already exist-->", alreadyExist);
-      // if (alreadyExist)
-      //   return res
-      //     .status(400)
-      //     .send("You have already borrowed this book");
+      const query = { email: borrowedBookData.email, bookID: borrowedBookData.bookID };
+      const alreadyExist = await borrowedCollection.findOne(query);
+      console.log("If already exist-->", alreadyExist);
+      if (alreadyExist)
+        return res
+          .status(400)
+          .send("You have already borrowed this book");
 
       // Save data in borrowed collection
       console.log(borrowedBookData)
