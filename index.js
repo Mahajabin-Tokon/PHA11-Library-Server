@@ -118,8 +118,19 @@ async function run() {
     // Get borrowed books base on email
     app.get("/borrowedBooks/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { email }
+      const query = { email };
       const result = await borrowedCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/return/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const filter = { _id: new ObjectId(id) };
+      const update = {
+        $inc: { quantity: 1 },
+      };
+      const result = await booksCollection.updateOne(filter, update);
       res.send(result);
     });
   } finally {
