@@ -99,16 +99,18 @@ async function run() {
           .send("You have already borrowed this book");
 
       // Save data in borrowed collection
-      console.log(borrowedBookData)
+      
       const result = await borrowedCollection.insertOne(borrowedBookData);
-      console.log(result)
+      
       // Increase book quantity
-      // const filter = { _id: new ObjectId(borrowedBookData.bookID) };
-      // const update = {
-      //   $inc: { quantity: -1 },
-      // };
-      // const updateBidCount = await booksCollection.updateOne(filter, update);
-      // console.log(updateBidCount);
+      const filter = { _id: new ObjectId(borrowedBookData.bookID) };
+      const update = {
+        $inc: { quantity: -1 },
+      };
+
+      const updatedQuantity = await booksCollection.updateOne(filter, update);
+      console.log(updatedQuantity);
+
       res.send(result);
     });
 
