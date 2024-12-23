@@ -31,7 +31,9 @@ async function run() {
     );
 
     // Start here
-    const booksCollection = client.db("booksDB").collection("allBooks");
+    const db = client.db("booksDB")
+    const booksCollection = db.collection("allBooks");
+    const borrowedCollection = db.collection("borrowedBooks");
 
     // Get all books from database
     app.get("/allBooks", async (req, res) => {
@@ -81,7 +83,32 @@ async function run() {
       };
 
       const result = await booksCollection.updateOne(filter, book, options);
+      console.log(result);
+      res.send(result);
+    });
+
+    app.post("/borrowBook", async (req, res) => {
+      const borrowedBookData = req.body;
+      // If a user has already borrowed
+      // const query = { email: borrowedBookData.email, bookID: borrowedBookData.bookID };
+      // const alreadyExist = await borrowedCollection.findOne(query);
+      // console.log("If already exist-->", alreadyExist);
+      // if (alreadyExist)
+      //   return res
+      //     .status(400)
+      //     .send("You have already borrowed this book");
+
+      // Save data in borrowed collection
+      console.log(borrowedBookData)
+      const result = await borrowedCollection.insertOne(borrowedBookData);
       console.log(result)
+      // Increase book quantity
+      // const filter = { _id: new ObjectId(borrowedBookData.bookID) };
+      // const update = {
+      //   $inc: { quantity: -1 },
+      // };
+      // const updateBidCount = await booksCollection.updateOne(filter, update);
+      // console.log(updateBidCount);
       res.send(result);
     });
 
