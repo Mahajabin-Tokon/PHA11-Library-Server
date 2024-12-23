@@ -95,7 +95,6 @@ async function run() {
         bookID: borrowedBookData.bookID,
       };
       const alreadyExist = await borrowedCollection.findOne(query);
-      console.log("If already exist-->", alreadyExist);
       if (alreadyExist)
         return res.status(400).send("You have already borrowed this book");
 
@@ -110,8 +109,7 @@ async function run() {
       };
 
       const updatedQuantity = await booksCollection.updateOne(filter, update);
-      console.log(updatedQuantity);
-
+  
       res.send(result);
     });
 
@@ -123,14 +121,19 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/return/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id)
-      const filter = { _id: new ObjectId(id) };
+    app.post("/return", async (req, res) => {
+      const { id, bookID } = req.body;
+      const filter = { _id: new ObjectId(bookID) };
       const update = {
         $inc: { quantity: 1 },
       };
-      const result = await booksCollection.updateOne(filter, update);
+      const updatedQuantity = await booksCollection.updateOne(filter, update);
+
+      const queryForBorrowedCollection = { _id: new ObjectId(id) };
+      const result = await borrowedCollection.deleteOne(
+        queryForBorrowedCollection
+      );
+
       res.send(result);
     });
   } finally {
