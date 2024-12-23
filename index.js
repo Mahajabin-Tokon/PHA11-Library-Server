@@ -31,7 +31,7 @@ async function run() {
     );
 
     // Start here
-    const db = client.db("booksDB")
+    const db = client.db("booksDB");
     const booksCollection = db.collection("allBooks");
     const borrowedCollection = db.collection("borrowedBooks");
 
@@ -83,25 +83,26 @@ async function run() {
       };
 
       const result = await booksCollection.updateOne(filter, book, options);
-      console.log(result);
       res.send(result);
     });
 
+    // Add borrowed book to database
     app.post("/borrowBook", async (req, res) => {
       const borrowedBookData = req.body;
       // If a user has already borrowed
-      const query = { email: borrowedBookData.email, bookID: borrowedBookData.bookID };
+      const query = {
+        email: borrowedBookData.email,
+        bookID: borrowedBookData.bookID,
+      };
       const alreadyExist = await borrowedCollection.findOne(query);
       console.log("If already exist-->", alreadyExist);
       if (alreadyExist)
-        return res
-          .status(400)
-          .send("You have already borrowed this book");
+        return res.status(400).send("You have already borrowed this book");
 
       // Save data in borrowed collection
-      
+
       const result = await borrowedCollection.insertOne(borrowedBookData);
-      
+
       // Increase book quantity
       const filter = { _id: new ObjectId(borrowedBookData.bookID) };
       const update = {
@@ -114,6 +115,13 @@ async function run() {
       res.send(result);
     });
 
+    // Get borrowed books base on email
+    app.get("/borrowedBooks/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email }
+      const result = await borrowedCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
