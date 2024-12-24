@@ -6,8 +6,14 @@ const app = express();
 const port = process.env.PORT || 5001;
 require("dotenv").config();
 
+const corsOptions = {
+  origin: ["http://localhost:5173"],
+  credentials: true,
+  optionalSuccessStatus: 200,
+};
+
 // middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.85wcl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -43,7 +49,13 @@ async function run() {
         expiresIn: "365d",
       });
       console.log(token);
-      res.send(token)
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
     });
 
     // Get all books from database
