@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const jwt = require("jsonwebtoken");
 const app = express();
 const port = process.env.PORT || 5001;
 require("dotenv").config();
@@ -34,6 +35,16 @@ async function run() {
     const db = client.db("booksDB");
     const booksCollection = db.collection("allBooks");
     const borrowedCollection = db.collection("borrowedBooks");
+
+    // Generate JWT
+    app.post("/jwt", async (req, res) => {
+      const email = req.body;
+      const token = jwt.sign(email, process.env.SECRET_KEY, {
+        expiresIn: "365d",
+      });
+      console.log(token);
+      res.send(token)
+    });
 
     // Get all books from database
     app.get("/allBooks", async (req, res) => {
@@ -109,7 +120,7 @@ async function run() {
       };
 
       const updatedQuantity = await booksCollection.updateOne(filter, update);
-  
+
       res.send(result);
     });
 
