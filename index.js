@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const app = express();
 const port = process.env.PORT || 5001;
 require("dotenv").config();
@@ -15,6 +16,20 @@ const corsOptions = {
 // middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
+
+// Verify Token middleware
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+  if (!token) return res.status(401).send({ message: "unauthorized access" });
+  jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+  });
+  next();
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.85wcl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -48,7 +63,6 @@ async function run() {
       const token = jwt.sign(email, process.env.SECRET_KEY, {
         expiresIn: "365d",
       });
-      console.log(token);
       res
         .cookie("token", token, {
           httpOnly: true,
@@ -59,15 +73,15 @@ async function run() {
     });
 
     // Clear cookie from browser
-    app.get('/logout', async (req, res) => {
+    app.get("/logout", async (req, res) => {
       res
-        .clearCookie('token', {
+        .clearCookie("token", {
           maxAge: 0,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
-        .send({ success: true })
-    })
+        .send({ success: true });
+    });
 
     // Get all books from database
     app.get("/allBooks", async (req, res) => {
@@ -148,8 +162,11 @@ async function run() {
     });
 
     // Get borrowed books base on email
-    app.get("/borrowedBooks/:email", async (req, res) => {
+    app.get("/borrowedBooks/:email", verifyToken, async (req, res) => {
+      const decodedEmail = req.user?.email;
       const email = req.params.email;
+      if (decodedEmail !== email)
+        return res.status(401).send({ message: "unauthorized access" });
       const query = { email };
       const result = await borrowedCollection.find(query).toArray();
       res.send(result);
