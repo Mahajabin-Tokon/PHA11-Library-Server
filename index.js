@@ -49,7 +49,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log(
@@ -81,6 +81,7 @@ async function run() {
       res
         .clearCookie("token", {
           maxAge: 0,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
@@ -88,7 +89,7 @@ async function run() {
     });
 
     // Get all books from database
-    app.get("/allBooks", verifyToken, async (req, res) => {
+    app.get("/allBooks", async (req, res) => {
       const cursor = booksCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -112,7 +113,7 @@ async function run() {
     });
 
     // Add a book to database
-    app.post("/addBook", verifyToken, async (req, res) => {
+    app.post("/addBook", async (req, res) => {
       const newBook = req.body;
       const result = await booksCollection.insertOne(newBook);
       res.send(result);
