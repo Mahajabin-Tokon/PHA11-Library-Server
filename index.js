@@ -89,7 +89,7 @@ async function run() {
     });
 
     // Get all books from database
-    app.get("/allBooks", async (req, res) => {
+    app.get("/allBooks", verifyToken, async (req, res) => {
       const cursor = booksCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -113,7 +113,7 @@ async function run() {
     });
 
     // Add a book to database
-    app.post("/addBook", async (req, res) => {
+    app.post("/addBook", verifyToken, async (req, res) => {
       const newBook = req.body;
       const result = await booksCollection.insertOne(newBook);
       res.send(result);
