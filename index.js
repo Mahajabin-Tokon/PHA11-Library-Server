@@ -8,7 +8,11 @@ const port = process.env.PORT || 5001;
 require("dotenv").config();
 
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: [
+    "http://localhost:5173",
+    "https://assignment11-f7541.web.app",
+    "https://assignment11-f7541.firebaseapp.com",
+  ],
   credentials: true,
   optionalSuccessStatus: 200,
 };
@@ -47,10 +51,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
 
     // Start here
     const db = client.db("booksDB");
@@ -84,7 +88,7 @@ async function run() {
     });
 
     // Get all books from database
-    app.get("/allBooks", async (req, res) => {
+    app.get("/allBooks", verifyToken, async (req, res) => {
       const cursor = booksCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -108,14 +112,14 @@ async function run() {
     });
 
     // Add a book to database
-    app.post("/addBook", async (req, res) => {
+    app.post("/addBook", verifyToken, async (req, res) => {
       const newBook = req.body;
       const result = await booksCollection.insertOne(newBook);
       res.send(result);
     });
 
     // Update a book by id
-    app.patch("/book/:id", async (req, res) => {
+    app.patch("/book/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
